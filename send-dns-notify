@@ -71,7 +71,11 @@ sub send_notify {
     $packet->header->opcode("NS_NOTIFY_OP");
     $packet->header->rd(0);
     $packet->header->aa(1);
-    $resolver->nameservers($nameserver);
+    my @nsparts = split(':', $nameserver);
+    my $port = $nsparts[ -1 ];
+    my $addr = join(':', @nsparts[ 0 .. $#nsparts-1 ]);
+    $resolver->nameservers($addr);
+    $resolver->port($port);
     my $reply = $resolver->send($packet);
     return $reply;
 }
@@ -84,7 +88,7 @@ B<send-dns-notify> - send DNS NOTIFY message
 
 =head1 SYNOPSIS
 
-B<send-dns-notify> [B<-d>] [B<-b> I<src_ipaddr>] B<-z> I<zone> B<-s> I<dns_server>
+B<send-dns-notify> [B<-d>] [B<-b> I<src_ipaddr>] B<-z> I<zone> B<-s> I<dns_server:port>
 
 send NOTIFY message for zone "irori.org" and "example.com" to nameserver 10.0.0.1 and 10.0.0.2.
 
@@ -103,9 +107,10 @@ send DNS NOTIFY message.
 
 zone name. You can specify multi zone.
 
-=item B<-s> I<dns_server>
+=item B<-s> I<dns_server>:<port>
 
-IP address or hostname of nameserver. You can specify multi nameserver.
+IP address or hostname of nameserver and port. You can specify multi nameserver.
+Port is required!
 
 =item B<-b> I<src_ipaddr>
 
